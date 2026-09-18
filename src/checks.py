@@ -10,6 +10,13 @@ NOT_LOGIN = {
     "",
 }
 
+SENSITIVE_GROUPS = {
+    "sudo" : "WARNING",
+    "wheel" : "WARNING",
+    "adm"   : "IMFO",
+    "docker" : "CRITICAL",
+}
+
 def check_user() -> dict :
 
     findings = []
@@ -45,3 +52,24 @@ def check_user() -> dict :
     }
     
 
+def check_sudo_groups() -> dict :
+    """Signale les membres des groupes conférant des privilèges élevés."""
+    findings = []
+    for group in grp.getgrall():
+        severity = SENSITIVE_GROUPS.get(goupe.gr_name)
+        if severity is None:
+            continue
+
+        for member in group.gr_mem:
+            findings.append({
+                "severity" : severity,
+                "message" : f"{member} est menbre du groupe '{group.gr_name}'",
+                "user" : member,
+                "group" : group.gr_name,
+       })
+return {
+    "check" : "sudo_groups",
+    "status" : "OK",
+    "findings" : findings,
+
+}
